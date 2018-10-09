@@ -15,40 +15,69 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div(children=[
+    dcc.Location(id='url', refresh=False),
     html.H1(children='Band Gantt'),
 
     html.Div(children='''
         A Gantt chart for bands.
     '''),
+    html.Div(children=[
+        html.Div([
+            html.Label('Band Name'),
+            dcc.Input(
+                id='band_search',
+                placeholder='Enter a band name...',
+                type='text',
+                value=''
+            )
+        ]),
+        html.Div(
+            id='search_results',children=[]
+        )
+    ],style={'float':'left'}),
 
-    html.Div(id='search', children=[
-        dcc.Input(id='input', value='Search for a band', type='search'),
-        html.Button(id='submit', type='submit', children='ok'),
-    ]),
     html.Div(id='graph',children=[
         dcc.Graph(id='gantt', figure={})
-    ],style={'marginLeft': 10})
+    ],style={'float':'right'})
+
 ])
+
+
+@app.callback(
+    Output(component_id='search_results', component_property='children'),
+    [Input(component_id='band_search', component_property='value')]
+)
+def search_for_band(query_string):
+    if len(query_string) > 3:
+        band_search_results = requests.get(
+            "https://musicbrainz.org/ws/2/artist?query={}&limit=10&fmt=json".format(query_string)
+        ).json()
+
+        
+        formatted_results = []
+        for artist in band_search_results['artists']:
+            formatted_results.append(
+                html.Span(children=[
+                    html.A(href=artist['id'], children=artist['name']),
+                    html.Br()
+                ])
+            )
+        
+        return formatted_results
+
 
 @app.callback(
     Output(component_id='gantt', component_property='figure'),
-    [],
-    [State(component_id='input', component_property='value')],
-    [Event('submit', 'click')]
+    [Input('url', 'pathname')]
 )
-def callback(band_name):
-    band_search_results = requests.get(
-        "https://musicbrainz.org/ws/2/artist?query={}&limit=10&fmt=json".format(band_name)
-    ).json()
-
-    try:
-        band_id = band_search_results['artists'][0]['id']
-    except:
-        return "no artist found"
-
+def create_graph(pathname):
+    # removes leading slash in pathname
+    artist_id = pathname[1:]
     band_info = requests.get(
-        "https://musicbrainz.org/ws/2/artist/{}?inc=artist-rels&fmt=json".format(band_id)
+        "https://musicbrainz.org/ws/2/artist/{}?inc=artist-rels&fmt=json".format(artist_id)
     ).json()
+
+    print()
     
     band_start_date = band_info['life-span']['begin']
     band_end_date = band_info['life-span']['ended'] if band_info['life-span']['ended'] else datetime.now()
