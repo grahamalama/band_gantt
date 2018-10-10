@@ -2,6 +2,7 @@
 from collections import defaultdict
 from datetime import datetime
 
+import colorlover as cl
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -24,9 +25,9 @@ app.layout = html.Div(children=[
         html.Div([
             html.Label('Band Name'),
             dcc.Input(
-                id='band_search', 
+                id='band_search',
                 placeholder='Enter a band name...',
-                type='text', 
+                type='text',
                 value=''
             )
         ]),
@@ -77,7 +78,20 @@ def create_graph(pathname):
             artist_id)
     ).json()
 
-    print()
+    members = band_member_dict(band_info)
+    band_member_names = set([member['Resource'] for member in members])
+    
+    fig_colors = variable_color_scale(len(band_member_names))
+    fig_colors_dict = dict(zip(band_member_names, fig_colors))
+
+    fig = ff.create_gantt(df=members, colors=fig_colors_dict, group_tasks=True,
+                          index_col='Resource')
+    return fig
+
+
+def band_member_dict(band_info):
+    '''returns a dict of band member info in a format useful for generating a 
+    plotly Gantt chart'''
 
     band_start_date = band_info['life-span']['begin']
 
@@ -87,7 +101,6 @@ def create_graph(pathname):
         band_end_date = datetime.now()
 
     members = []
-
     for relation in band_info['relations']:
         if relation['type'] in ['member of band', 'instrumental supporting musician']:
 
@@ -102,9 +115,15 @@ def create_graph(pathname):
                 "Resource": member
             })
 
-    fig = ff.create_gantt(df=members, group_tasks=True)
+    return members
 
-    return fig
+
+def variable_color_scale(band_size):
+    '''returns a color scale that accomodates bands smaller than 2 members and
+       larger than 12 members'''
+    colors = cl.scales['12']['qual']['Paired'] * (band_size // 12 + 1)
+    colors = colors[: 12 - (band_size % 12 + 1):-1]
+    return colors
 
 
 if __name__ == '__main__':
