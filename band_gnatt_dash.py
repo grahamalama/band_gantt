@@ -6,9 +6,8 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.figure_factory as ff
-import plotly.plotly as py
 import requests
-from dash.dependencies import Event, Input, Output, State
+from dash.dependencies import Input, Output
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -25,20 +24,20 @@ app.layout = html.Div(children=[
         html.Div([
             html.Label('Band Name'),
             dcc.Input(
-                id='band_search',
+                id='band_search', 
                 placeholder='Enter a band name...',
-                type='text',
+                type='text', 
                 value=''
             )
         ]),
         html.Div(
-            id='search_results',children=[]
+            id='search_results', children=[]
         )
-    ],style={'float':'left'}),
+    ], style={'float': 'left'}),
 
-    html.Div(id='graph',children=[
+    html.Div(id='graph', children=[
         dcc.Graph(id='gantt', figure={})
-    ],style={'float':'right'})
+    ], style={'float': 'right'})
 
 ])
 
@@ -50,10 +49,10 @@ app.layout = html.Div(children=[
 def search_for_band(query_string):
     if len(query_string) > 3:
         band_search_results = requests.get(
-            "https://musicbrainz.org/ws/2/artist?query={}&limit=10&fmt=json".format(query_string)
+            "https://musicbrainz.org/ws/2/artist?query={}&limit=10&fmt=json".format(
+                query_string)
         ).json()
 
-        
         formatted_results = []
         for artist in band_search_results['artists']:
             formatted_results.append(
@@ -62,43 +61,49 @@ def search_for_band(query_string):
                     html.Br()
                 ])
             )
-        
+
         return formatted_results
 
 
 @app.callback(
     Output(component_id='gantt', component_property='figure'),
-    [Input('url', 'pathname')]
+    [Input(component_id='url', component_property='pathname')]
 )
 def create_graph(pathname):
     # removes leading slash in pathname
     artist_id = pathname[1:]
     band_info = requests.get(
-        "https://musicbrainz.org/ws/2/artist/{}?inc=artist-rels&fmt=json".format(artist_id)
+        "https://musicbrainz.org/ws/2/artist/{}?inc=artist-rels&fmt=json".format(
+            artist_id)
     ).json()
 
     print()
-    
+
     band_start_date = band_info['life-span']['begin']
-    band_end_date = band_info['life-span']['ended'] if band_info['life-span']['ended'] else datetime.now()
+
+    if band_info['life-span']['ended']:
+        band_end_date = band_info['life-span']['ended']
+    else:
+        band_end_date = datetime.now()
 
     members = []
 
     for relation in band_info['relations']:
-        if relation['type'] == 'member of band' or relation['type'] == "instrumental supporting musician":
-            
+        if relation['type'] in ['member of band', 'instrumental supporting musician']:
+
             member = relation['artist']['name']
             start = relation['begin'] if relation['begin'] else band_start_date
             finish = relation['end'] if relation['end'] else band_end_date
-            
+
             members.append({
                 "Task": member,
                 "Start": start,
-                "Finish": finish 
+                "Finish": finish,
+                "Resource": member
             })
 
-    fig = ff.create_gantt(members, group_tasks=True)
-    
+    fig = ff.create_gantt(df=members, group_tasks=True)
+
     return fig
 
 
