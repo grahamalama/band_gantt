@@ -37,9 +37,12 @@ app.layout = html.Div(children=[
     ], style={'float': 'left'}),
 
     html.Div(id='graph', children=[
-        dcc.Graph(id='gantt', figure={})
-    ], style={'float': 'right'})
-
+        dcc.Graph(
+            id='gantt', 
+            figure={},
+            config={'displayModeBar': False}
+        )
+    ], style={'float': 'right','outline-style': 'dotted'})
 ])
 
 
@@ -51,7 +54,7 @@ def search_for_band(query_string):
     if len(query_string) > 3:
         band_search_results = requests.get(
             "https://musicbrainz.org/ws/2/artist?query={}&limit=10&fmt=json".format(
-                query_string)
+                query_string + '*')
         ).json()
 
         formatted_results = []
@@ -85,9 +88,22 @@ def create_graph(pathname):
     fig_colors_dict = dict(zip(band_member_names, fig_colors))
 
     fig = ff.create_gantt(df=members, colors=fig_colors_dict, group_tasks=True,
-                          index_col='Resource')
+                          index_col='Resource', title=band_info['name'])
+    fig = customize_gantt(fig)
+
     return fig
 
+def customize_gantt(gantt_fig):
+    del gantt_fig['layout']['xaxis']['rangeselector']
+    gantt_fig['layout']['yaxis']['autorange'] = True
+    gantt_fig['layout']['margin'] =  dict(
+        r = 0,
+        t = 100,
+        b = 100,
+        l = 200)
+
+    return gantt_fig
+    
 
 def band_member_dict(band_info):
     '''returns a dict of band member info in a format useful for generating a 
