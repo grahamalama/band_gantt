@@ -16,14 +16,10 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div(children=[
     dcc.Location(id='url', refresh=False),
+    html.Div(children=[    
     html.H1(children='Band Gantt'),
-
-    html.Div(children='''
-        A Gantt chart for bands.
-    '''),
     html.Div(children=[
         html.Div([
-            html.Label('Band Name'),
             dcc.Input(
                 id='band_search',
                 placeholder='Enter a band name...',
@@ -34,7 +30,8 @@ app.layout = html.Div(children=[
         html.Div(
             id='search_results', children=[]
         )
-    ], style={'float': 'left'}),
+        ]),
+    ],style={'float': 'left'}),
 
     html.Div(id='graph', children=[
         dcc.Graph(
