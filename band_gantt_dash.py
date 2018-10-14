@@ -74,11 +74,10 @@ def search_for_band(query_string):
     [Input(component_id='url', component_property='pathname')]
 )
 def create_graph(pathname):
-    print(pathname)
     
     if not pathname or pathname == "/":
-
-        example_ids = [
+        # A few example bands to generate at random when the app opens
+        example_ids = [ 
             'b10bbbfc-cf9e-42e0-be17-e2c3e1d2600d', # The Beatles
             'c1d4f2ba-cf39-460c-9528-6b827d3417a1', # Yes
             'eeb1195b-f213-4ce1-b28c-8565211f8e43', # Guns N' Roses 
