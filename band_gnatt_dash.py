@@ -90,9 +90,13 @@ def create_graph(pathname):
 
     return fig
 
-def customize_gantt(gantt_fig):
+def customize_gantt(gantt_fig,start_date,end_date):
+    '''Make changes to figure generated from create_gantt()'''
+
     del gantt_fig['layout']['xaxis']['rangeselector']
     gantt_fig['layout']['yaxis']['autorange'] = True
+    gantt_fig['layout']['xaxis']['range'] = [start_date,end_date]
+    gantt_fig['layout']['xaxis']['dtick'] = 'M24'
     gantt_fig['layout']['margin'] =  dict(
         r = 0,
         t = 100,
