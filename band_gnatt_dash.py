@@ -58,7 +58,7 @@ def search_for_band(query_string):
         for artist in band_search_results['artists']:
             formatted_results.append(
                 html.Span(children=[
-                    html.A(href=artist['id'], children=artist['name']),
+                    dcc.Link(artist['name'], href=artist['id']),
                     html.Br()
                 ])
             )
