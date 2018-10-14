@@ -1,6 +1,6 @@
 # Band Gantt
 
-Visualize the tenure of band members in a band.
+Visualize the tenures of the members of a band.
 
 App built with [Dash](https://github.com/plotly/dash)
 
