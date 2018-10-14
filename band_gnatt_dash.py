@@ -79,6 +79,7 @@ def create_graph(pathname):
     ).json()
 
     members = band_member_dict(band_info)
+    band_start_date, band_end_date  = start_and_end_date(band_info)
     band_member_names = set([member['Resource'] for member in members])
     
     fig_colors = variable_color_scale(len(band_member_names))
@@ -86,8 +87,7 @@ def create_graph(pathname):
 
     fig = ff.create_gantt(df=members, colors=fig_colors_dict, group_tasks=True,
                           index_col='Resource', title=band_info['name'])
-    fig = customize_gantt(fig)
-
+    fig = customize_gantt(fig,band_start_date,band_end_date)
     return fig
 
 def customize_gantt(gantt_fig,start_date,end_date):
@@ -105,17 +105,21 @@ def customize_gantt(gantt_fig,start_date,end_date):
 
     return gantt_fig
     
-
-def band_member_dict(band_info):
-    '''returns a dict of band member info in a format useful for generating a 
-    plotly Gantt chart'''
-
+def start_and_end_date(band_info):
     band_start_date = band_info['life-span']['begin']
 
     if band_info['life-span']['ended']:
         band_end_date = band_info['life-span']['ended']
     else:
         band_end_date = datetime.now()
+
+    return (band_start_date,band_end_date)
+
+def band_member_dict(band_info):
+    '''returns a dict of band member info in a format useful for generating a 
+    plotly Gantt chart'''
+
+    band_start_date, band_end_date  = start_and_end_date(band_info)
 
     members = []
     for relation in band_info['relations']:
