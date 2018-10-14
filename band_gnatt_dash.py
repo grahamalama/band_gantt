@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import random
 from collections import defaultdict
 from datetime import datetime
 
@@ -17,19 +18,21 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.layout = html.Div(children=[
     dcc.Location(id='url', refresh=False),
     html.Div(children=[    
-    html.H1(children='Band Gantt'),
-    html.Div(children=[
-        html.Div([
-            dcc.Input(
-                id='band_search',
-                placeholder='Enter a band name...',
-                type='text',
-                value=''
+        html.H1(children='Band Gantt'),
+        html.Div(children=[
+            html.Div([
+                dcc.Input(
+                    id='band_search',
+                    placeholder='Enter a band name...',
+                    type='text',
+                    value=''
+                )
+            ]),
+            html.Div(
+                id='search_results', 
+                children=[],
+                style={'background-color': "#fcfcfc",'border-radius': '20px'}
             )
-        ]),
-        html.Div(
-            id='search_results', children=[]
-        )
         ]),
     ],style={'float': 'left'}),
 
@@ -39,7 +42,7 @@ app.layout = html.Div(children=[
             figure={},
             config={'displayModeBar': False}
         )
-    ], style={'float': 'right','outline-style': 'dotted'})
+    ], style={'float': 'right','outline-style': 'solid'})
 ])
 
 
@@ -71,8 +74,21 @@ def search_for_band(query_string):
     [Input(component_id='url', component_property='pathname')]
 )
 def create_graph(pathname):
-    # removes leading slash in pathname
-    artist_id = pathname[1:]
+    print(pathname)
+    
+    if not pathname or pathname == "/":
+
+        example_ids = [
+            'b10bbbfc-cf9e-42e0-be17-e2c3e1d2600d', # The Beatles
+            'c1d4f2ba-cf39-460c-9528-6b827d3417a1', # Yes
+            'eeb1195b-f213-4ce1-b28c-8565211f8e43', # Guns N' Roses 
+            '36bfa85f-737b-41db-a8fc-b8825850ffc3', # Pavement
+        ]
+        
+        artist_id = random.choice(example_ids)
+    else:
+        artist_id = pathname[1:] # removes leading slash in pathname
+
     band_info = requests.get(
         "https://musicbrainz.org/ws/2/artist/{}?inc=artist-rels&fmt=json".format(
             artist_id)
@@ -94,25 +110,21 @@ def customize_gantt(gantt_fig,start_date,end_date):
     '''Make changes to figure generated from create_gantt()'''
 
     del gantt_fig['layout']['xaxis']['rangeselector']
+    gantt_fig['layout']['xaxis']['autorange'] = True
     gantt_fig['layout']['yaxis']['autorange'] = True
     gantt_fig['layout']['xaxis']['range'] = [start_date,end_date]
-    gantt_fig['layout']['xaxis']['dtick'] = 'M24'
-    gantt_fig['layout']['margin'] =  dict(
-        r = 0,
-        t = 100,
-        b = 100,
-        l = 200)
+    gantt_fig['layout']['xaxis']['dtick'] = 'M12'
+    gantt_fig['layout']['margin'] =  dict(r=10,t=100,b=50,l=150)
 
     return gantt_fig
-    
+
 def start_and_end_date(band_info):
     band_start_date = band_info['life-span']['begin']
 
-    if band_info['life-span']['ended']:
-        band_end_date = band_info['life-span']['ended']
+    if band_info['life-span']['ended'] == True:
+        band_end_date = band_info['life-span']['end']
     else:
         band_end_date = datetime.now()
-
     return (band_start_date,band_end_date)
 
 def band_member_dict(band_info):
