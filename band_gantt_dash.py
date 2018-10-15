@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import random
 from collections import defaultdict
 from datetime import datetime
@@ -14,6 +15,7 @@ from dash.dependencies import Input, Output
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+server = app.server
 
 app.layout = html.Div(children=[
     dcc.Location(id='url', refresh=False),
@@ -51,7 +53,7 @@ app.layout = html.Div(children=[
     [Input(component_id='band_search', component_property='value')]
 )
 def search_for_band(query_string):
-    if len(query_string) > 3:
+    if len(query_string) > 2:
         band_search_results = requests.get(
             "https://musicbrainz.org/ws/2/artist?query={}&limit=10&fmt=json".format(
                 query_string + '*')
