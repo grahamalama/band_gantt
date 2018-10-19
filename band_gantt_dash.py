@@ -20,6 +20,7 @@ server = app.server
 app.layout = html.Div(children=[
     dcc.Location(id='url', refresh=False),
     html.Div(children=[
+        
         html.Div(children=[    
             html.H1(children='Band Gantt'),
             html.Div(children=[
@@ -34,7 +35,12 @@ app.layout = html.Div(children=[
                 html.Div(
                     id='search_results', 
                     children=[],
-                    style={'background-color': "#fcfcfc",'border-radius': '20px','zIndex':'1','position':'absolute'}
+                    style={
+                        'background-color': "#fcfcfc",
+                        'border-radius': '20px',
+                        'zIndex':'1',
+                        'position':'absolute'
+                    }
                 )
             ]),
         ]),
@@ -46,6 +52,7 @@ app.layout = html.Div(children=[
                 config={'displayModeBar': False}
             )
         ], className="twelve columns")
+
     ],className="row")     
 ])
 
@@ -71,6 +78,13 @@ def search_for_band(query_string):
             )
 
         return formatted_results
+
+@app.callback(
+    Output(component_id='band_search', component_property='value'),
+    [Input(component_id='url', component_property='pathname')]
+)
+def clear_search_bar(pathname):
+    return ''
 
 
 @app.callback(
