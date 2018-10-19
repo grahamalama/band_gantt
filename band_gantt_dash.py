@@ -19,32 +19,34 @@ server = app.server
 
 app.layout = html.Div(children=[
     dcc.Location(id='url', refresh=False),
-    html.Div(children=[    
-        html.H1(children='Band Gantt'),
-        html.Div(children=[
-            html.Div([
-                dcc.Input(
-                    id='band_search',
-                    placeholder='Enter a band name...',
-                    type='text',
-                    value=''
+    html.Div(children=[
+        html.Div(children=[    
+            html.H1(children='Band Gantt'),
+            html.Div(children=[
+                html.Div([
+                    dcc.Input(
+                        id='band_search',
+                        placeholder='Enter a band name...',
+                        type='text',
+                        value=''
+                    )
+                ]),
+                html.Div(
+                    id='search_results', 
+                    children=[],
+                    style={'background-color': "#fcfcfc",'border-radius': '20px','zIndex':'1','position':'absolute'}
                 )
             ]),
-            html.Div(
-                id='search_results', 
-                children=[],
-                style={'background-color': "#fcfcfc",'border-radius': '20px'}
-            )
         ]),
-    ],style={'float': 'left'}),
 
-    html.Div(id='graph', children=[
-        dcc.Graph(
-            id='gantt', 
-            figure={},
-            config={'displayModeBar': False}
-        )
-    ], style={'float': 'right','outline-style': 'solid'})
+        html.Div(id='graph', children=[
+            dcc.Graph(
+                id='gantt', 
+                figure={},
+                config={'displayModeBar': False}
+            )
+        ], className="twelve columns")
+    ],className="row")     
 ])
 
 
@@ -111,10 +113,11 @@ def customize_gantt(gantt_fig,start_date,end_date):
     '''Make changes to figure generated from create_gantt()'''
 
     del gantt_fig['layout']['xaxis']['rangeselector']
+    del gantt_fig['layout']['height']
+    del gantt_fig['layout']['width'] 
+    gantt_fig['layout']['autosize'] = True
     gantt_fig['layout']['xaxis']['autorange'] = True
     gantt_fig['layout']['yaxis']['autorange'] = True
-    gantt_fig['layout']['xaxis']['range'] = [start_date,end_date]
-    gantt_fig['layout']['xaxis']['dtick'] = 'M12'
     gantt_fig['layout']['margin'] =  dict(r=10,t=100,b=50,l=150)
 
     return gantt_fig
