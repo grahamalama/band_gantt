@@ -45,13 +45,7 @@ app.layout = html.Div(children=[
             ]),
         ]),
 
-        html.Div(id='graph', children=[
-            dcc.Graph(
-                id='gantt', 
-                figure={},
-                config={'displayModeBar': False}
-            )
-        ], className="twelve columns")
+        html.Div(id='graph', children=[], className="twelve columns")
 
     ],className="row")     
 ])
@@ -88,12 +82,12 @@ def clear_search_bar(pathname):
 
 
 @app.callback(
-    Output(component_id='gantt', component_property='figure'),
+    Output(component_id='graph', component_property='children'),
     [Input(component_id='url', component_property='pathname')]
 )
 def create_graph(pathname):
     
-    if not pathname or pathname == "/":
+    if pathname == "/":
         # A few example bands to generate at random when the app opens
         example_ids = [ 
             'b10bbbfc-cf9e-42e0-be17-e2c3e1d2600d', # The Beatles
@@ -112,16 +106,23 @@ def create_graph(pathname):
     ).json()
 
     members = band_member_dict(band_info)
-    band_start_date, band_end_date  = start_and_end_date(band_info)
-    band_member_names = set([member['Resource'] for member in members])
-    
-    fig_colors = variable_color_scale(len(band_member_names))
-    fig_colors_dict = dict(zip(band_member_names, fig_colors))
+    if members:
+        band_start_date, band_end_date  = start_and_end_date(band_info)
+        band_member_names = set([member['Resource'] for member in members])
+        
+        fig_colors = variable_color_scale(len(band_member_names))
+        fig_colors_dict = dict(zip(band_member_names, fig_colors))
 
-    fig = ff.create_gantt(df=members, colors=fig_colors_dict, group_tasks=True,
-                          index_col='Resource', title=band_info['name'])
-    fig = customize_gantt(fig,band_start_date,band_end_date)
-    return fig
+        fig = ff.create_gantt(df=members, colors=fig_colors_dict, group_tasks=True,
+                            index_col='Resource', title=band_info['name'])
+        fig = customize_gantt(fig,band_start_date,band_end_date)
+        return dcc.Graph(
+                id='gantt', 
+                figure=fig,
+                config={'displayModeBar': False}
+            )
+    else:
+        return html.H3("No band member information available.")
 
 def customize_gantt(gantt_fig,start_date,end_date):
     '''Make changes to figure generated from create_gantt()'''
