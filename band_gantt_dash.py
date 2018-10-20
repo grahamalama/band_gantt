@@ -12,9 +12,7 @@ import plotly.figure_factory as ff
 import requests
 from dash.dependencies import Input, Output
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__)
 app.title='Band Gantt'
 server = app.server
 
