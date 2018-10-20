@@ -58,8 +58,7 @@ app.layout = html.Div(children=[
 def search_for_band(query_string):
     if len(query_string) > 2:
         band_search_results = requests.get(
-            "https://musicbrainz.org/ws/2/artist?query={}&limit=10&fmt=json".format(
-                query_string + '*')
+            "https://musicbrainz.org/ws/2/artist?query={}&limit=10&fmt=json".format(query_string + '*')
         ).json()
 
         formatted_results = []
@@ -87,7 +86,7 @@ def clear_search_bar(pathname):
 )
 def create_graph(pathname):
     
-    if pathname == "/":
+    if not pathname or pathname == "/":
         # A few example bands to generate at random when the app opens
         example_ids = [ 
             'b10bbbfc-cf9e-42e0-be17-e2c3e1d2600d', # The Beatles
@@ -101,9 +100,11 @@ def create_graph(pathname):
         artist_id = pathname[1:] # removes leading slash in pathname
 
     band_info = requests.get(
-        "https://musicbrainz.org/ws/2/artist/{}?inc=artist-rels&fmt=json".format(
-            artist_id)
+        "https://musicbrainz.org/ws/2/artist/{}?inc=artist-rels&fmt=json".format(artist_id)
     ).json()
+
+    if 'error' in band_info:
+        return html.H3('Invalid artist id.')
 
     members = band_member_dict(band_info)
     if members:
