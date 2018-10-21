@@ -10,7 +10,7 @@ Uses data from the [MusicBrainz API](https://musicbrainz.org/doc/Development/XML
 
    - Format: `https://musicbrainz.org/ws/2/artist?query=<QUERY>&limit=<LIMIT>&offset=<OFFSET>&fmt=json`
 
-   - Example: https://musicbrainz.org/ws/2/artist?query=LCD+Soundsystem&limit=10
+   - Example: https://musicbrainz.org/ws/2/artist?query=LCD+Soundsystem&limit=10&fmt=json
 
 
  - Get band info:
